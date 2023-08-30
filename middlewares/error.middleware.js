@@ -1,12 +1,11 @@
 const errorMiddleware = (error, req, res, next) => {
-
     req.statusCode = req.statusCode || 500;
-    req.massgae = req.massgae || "Something went wrong";
+    req.message = req.message || "Something went wrong";
 
     return res.status(req.statusCode).json({
         success: false,
-        massgae: req.massgae,
-        statck: error.statck
+        message: req.message,
+        stack: error.stack
     });
 }
 

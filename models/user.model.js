@@ -49,25 +49,35 @@ const userSchema = new Schema({
     timestamps: true
 });
 
-userSchema.pre('save', async function () {
+userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         return next();
     }
     this.password = await bcryptjs.hash(this.password, 10);
 });
 
-userSchema.method = {
+userSchema.methods = {
     comparePassword: async function (plainTextPassword) {
-        return bcryptjs.compare(plainTextPassword, this.password)
+        return await bcryptjs.compare(plainTextPassword, this.password)
     },
     generateJWTToken: function () {
-        return jwt.sign({
-            id: this._id, role: this.role, email: this.email, subscription: this.subscription
-        }),
-            process.env.JWT_SECRET,
+        return jwt.sign(
+            { id: this._id, role: this.role, email: this.email, subscription: this.subscription },
+            process.env.JWT_SECRET,),
         {
             expiresIn: process.env.JWT_EXPIRY
         }
+    },
+    generatePasswordToken: async function () {
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        this.forgotPasswordToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex')
+        this.forgotPasswordExpiry = Date.now() + 15 * 60 * 1000  // 15 min from now
+
+        return resetToken
     }
 }
 
