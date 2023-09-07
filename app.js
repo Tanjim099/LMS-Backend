@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userRoutes from './routes/user.routes.js';
+import courseRoutes from './routes/course.routes.js';
 import errorMiddleware from './middlewares/error.middleware.js';
 import morgan from 'morgan';
 
@@ -22,7 +23,8 @@ app.use('/ping', (req, res) => {
     res.send("Pong")
 })
 
-app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/user', userRoutes)
+app.use('/api/v1/courses', courseRoutes);
 app.use('*', (req, res) => {
     res.status(404).send('OOPS!! 404 page not found ')
 });
