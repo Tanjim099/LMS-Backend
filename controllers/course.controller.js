@@ -66,7 +66,7 @@ const createCourse = async (req, res, next) => {
             });
             if (result) {
                 course.thumbail.public_id = result.public_id;
-                course.thumbail.secure_url - result.secure_url;
+                course.thumbail.secure_url = result.secure_url;
             }
             fs.rm(`uploads/${req.file.fileName}`)
         }
@@ -79,15 +79,63 @@ const createCourse = async (req, res, next) => {
         })
     } catch (error) {
         return next(
-            new AppError(error.massage, 500)
+            new AppError("error", 500)
         )
     }
 }
 const updateCourse = async (req, res, next) => {
+    try {
+        const { courseId } = req.params;
+        const course = await Course.findByIdAndUpdate(
+            courseId,
+            {
+                $set: req.body
+            },
+            {
+                runValidators: true
+            }
+        )
+        if (!course) {
+            return next(
+                new AppError('Course is does not exists', 400)
+            )
+        }
 
+        res.status(200).json({
+            success: true,
+            massage: 'Course updated successfully'
+        })
+    } catch (error) {
+        return next(
+            new AppError(error.massage, 500)
+        )
+    }
 }
 const deleteCourse = async (req, res, next) => {
+    try {
+        const { courseId } = req.params;
+        console.log(courseId)
+        // Finding the course via the course ID
+        const course = await Course.findByIdAndDelete(courseId);
 
+        // If course not find send the message as stated below
+        if (!course) {
+            return next(new AppError('Course with given id does not exist.', 404));
+        }
+
+        // Remove course
+        // await course.remove();
+
+        // Send the message as response
+        res.status(200).json({
+            success: true,
+            message: 'Course deleted successfully',
+        });
+    } catch (error) {
+        return next(
+            new AppError(error.massage, 500)
+        )
+    }
 }
 
 export { getAllCourses, getLecturesByCourseId, createCourse, updateCourse, deleteCourse }

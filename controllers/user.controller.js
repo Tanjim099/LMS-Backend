@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import cloudinary from 'cloudinary';
 import fs from 'fs/promises';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs'
 import sendEmail from "../utils/sendEmail.js";
 
 const cookieOptions = {
@@ -87,7 +88,7 @@ const login = async (req, res, next) => {
     try {
         const user = await User.findOne({ email }).select('+password');
 
-        if (!user || !user.comparePassword(password)) {
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             return next(new AppError('Email or password do not match', 400));
         }
 
